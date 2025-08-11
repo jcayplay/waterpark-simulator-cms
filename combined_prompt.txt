@@ -1,0 +1,1029 @@
+//--- PROJECT STRUCTURE ---
+
+cms-waterpark-simulator
+    ├── .github
+    |   └── workflows
+    |       └── deploy.yml
+    ├── .strapi
+    |   └── client
+    |       ├── app.js
+    |       └── index.html
+    ├── config
+    |   ├── admin.ts
+    |   ├── api.ts
+    |   ├── database.ts
+    |   ├── middlewares.ts
+    |   ├── plugins.ts
+    |   └── server.ts
+    ├── database
+    |   └── migrations
+    |       └── .gitkeep
+    ├── lib
+    ├── mysql
+    |   └── conf.d
+    |       └── mysql.cnf
+    ├── nginx
+    |   └── nginx.conf
+    ├── public
+    |   ├── uploads
+    |   |   └── .gitkeep
+    |   └── robots.txt
+    ├── src
+    |   ├── admin
+    |   |   ├── app.example.tsx
+    |   |   ├── tsconfig.json
+    |   |   └── vite.config.example.ts
+    |   ├── api
+    |   |   ├── subcriber
+    |   |   |   ├── content-types
+    |   |   |   |   └── subcriber
+    |   |   |   |       └── schema.json
+    |   |   |   ├── controllers
+    |   |   |   |   └── subcriber.ts
+    |   |   |   ├── routes
+    |   |   |   |   └── subcriber.ts
+    |   |   |   └── services
+    |   |   |       ├── custom-subcriber.ts
+    |   |   |       └── subcriber.ts
+    |   |   └── .gitkeep
+    |   ├── extensions
+    |   |   └── .gitkeep
+    |   ├── types
+    |   |   └── strapi.d.ts
+    |   └── index.ts
+    ├── types
+    |   └── generated
+    |       ├── components.d.ts
+    |       └── contentTypes.d.ts
+    ├── .dockerignore
+    ├── .env
+    ├── .env.example
+    ├── .env.production
+    ├── .strapi-updater.json
+    ├── combined_prompt.txt
+    ├── docker-compose.yml
+    ├── Dockerfile
+    ├── favicon.png
+    ├── install.sh
+    ├── license.txt
+    ├── nginx.nginx.conf
+    ├── package.json
+    ├── README.md
+    └── tsconfig.json
+
+
+//--- FILE CONTENTS ---
+
+//--- FILE: .env ---
+
+
+# Server
+HOST=0.0.0.0
+PORT=1337
+
+# Secrets
+APP_KEYS=rCqnOmr293LDJB5w1GDknQ==,DOl2TSo5CqQf1wxk3FOxPg==,5rWopX7LCIhA+7AEf+aC5g==,Se77A7BRCzQg6sHX4jh3Fw==
+API_TOKEN_SALT=otJTNjRqT/w7uM4NLpQ1EA==
+ADMIN_JWT_SECRET=GBue0H3Jp3tJYnsHztKiGQ==
+TRANSFER_TOKEN_SALT=Y9Z9P7uIGPhIDZwxaRxPcw==
+ENCRYPTION_KEY=uEjdDsE3iiUhSfF6iziL1A==
+
+# Database
+DATABASE_CLIENT=mysql
+DATABASE_HOST=127.0.0.1
+DATABASE_PORT=3309
+DATABASE_NAME=waterpark-simulator
+DATABASE_USERNAME=strapi_user
+DATABASE_PASSWORD=rootpw
+DATABASE_SSL=false
+DATABASE_FILENAME=
+JWT_SECRET=ttbTahbzfeEknTrnJ0dNZw==
+
+# CORS and Frontend URL
+FRONTEND_URL="http://localhost:3000"
+
+## Cloudflare Turnstile
+CLOUDFLARE_TURNSTILE_SECRET_KEY="0x4AAAAAABo_keAhXKO0XJzXAU3u5ufMD5w" # Thay bằng Secret Key của bạn
+GOOGLE_RECAPTCHA_SECRET_KEY="6LcGKaArAAAAAHVKUL6VePrffIM7JUgXd_0oiAxj" # Thay bằng Secret Key của bạn
+SUBSCRIBE_COOLDOWN_MINUTES=5
+CONFIRMATION_TOKEN_EXPIRES_DAYS=7
+# CẤU HÌNH EMAIL (Ví dụ với Nodemailer)
+EMAIL_PROVIDER=nodemailer
+EMAIL_HOST=smtp.example.com
+EMAIL_PORT=587
+EMAIL_USER=thaliatrandesign@gmail.com
+EMAIL_PASS=couv gjtl mrzv fajp
+EMAIL_FROM="Waterpark simulator <no-reply@waterpark-simulator.com>"
+EMAIL_REPLY_TO="Waterpark simulator <no-reply@waterpark-simulator.com>"
+
+//--- END OF FILE: .env ---
+
+//--- FILE: package.json ---
+
+{
+  "name": "cms-waterpark-simulator",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A Strapi application",
+  "scripts": {
+    "build": "strapi build",
+    "console": "strapi console",
+    "deploy": "strapi deploy",
+    "dev": "strapi develop",
+    "develop": "strapi develop",
+    "start": "strapi start",
+    "strapi": "strapi",
+    "upgrade": "npx @strapi/upgrade latest",
+    "upgrade:dry": "npx @strapi/upgrade latest --dry"
+  },
+  "dependencies": {
+    "@strapi/plugin-cloud": "5.21.0",
+    "@strapi/plugin-users-permissions": "5.21.0",
+    "@strapi/provider-email-nodemailer": "^5.21.0",
+    "@strapi/provider-email-sendgrid": "^5.21.0",
+    "@strapi/strapi": "5.21.0",
+    "mysql2": "3.9.8",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-router-dom": "^6.0.0",
+    "styled-components": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=18.0.0 <=22.x.x",
+    "npm": ">=6.0.0"
+  },
+  "strapi": {
+    "uuid": "980db6a8-d8e6-4ec9-a84a-0b86321206f6",
+    "installId": "d9e25681a9286193a19a7cb162564b63b6538032dc604d5d4ae60154bae2e315"
+  }
+}
+
+
+//--- END OF FILE: package.json ---
+
+//--- FILE: .env.production ---
+
+# Server Configuration
+HOST=0.0.0.0
+PORT=1337
+NODE_ENV=production
+
+# Security Keys (Generate new ones for production)
+APP_KEYS=rCqnOmr293LDJB5w1GDknQ==,DOl2TSo5CqQf1wxk3FOxPg==,5rWopX7LCIhA+7AEf+aC5g==,Se77A7BRCzQg6sHX4jh3Fw==
+API_TOKEN_SALT=otJTNjRqT/w7uM4NLpQ1EA==
+ADMIN_JWT_SECRET=GBue0H3Jp3tJYnsHztKiGQ==
+TRANSFER_TOKEN_SALT=Y9Z9P7uIGPhIDZwxaRxPcw==
+ENCRYPTION_KEY=uEjdDsE3iiUhSfF6iziL1A==
+JWT_SECRET=ttbTahbzfeEknTrnJ0dNZw==
+
+# Database Configuration - Updated service name
+DATABASE_CLIENT=mysql
+DATABASE_HOST=strapi-mysql
+DATABASE_PORT=3306
+DATABASE_NAME=waterpark-simulator
+DATABASE_USERNAME=strapi_user
+DATABASE_PASSWORD=your_secure_database_password
+DATABASE_SSL=false
+
+# CORS and Frontend URL
+FRONTEND_URL="https://yourdomain.com"
+
+# External Services
+CLOUDFLARE_TURNSTILE_SECRET_KEY=your_turnstile_secret_key
+GOOGLE_RECAPTCHA_SECRET_KEY=your_recaptcha_secret_key
+SUBSCRIBE_COOLDOWN_MINUTES=5
+CONFIRMATION_TOKEN_EXPIRES_DAYS=7
+
+# Email Configuration
+EMAIL_PROVIDER=nodemailer
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USER=your_email@gmail.com
+EMAIL_PASS=your_app_password
+EMAIL_FROM="Waterpark Simulator <no-reply@waterpark-simulator.com>"
+EMAIL_REPLY_TO="Waterpark Simulator <no-reply@waterpark-simulator.com>"
+
+//--- END OF FILE: .env.production ---
+
+//--- FILE: docker-compose.yml ---
+
+version: '3.8'
+
+services:
+  # MySQL Database
+  strapi-mysql:
+    image: mysql:8.0
+    container_name: strapi-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DATABASE_PASSWORD}
+      MYSQL_DATABASE: ${DATABASE_NAME}
+      MYSQL_USER: ${DATABASE_USERNAME}
+      MYSQL_PASSWORD: ${DATABASE_PASSWORD}
+      MYSQL_ROOT_HOST: '%'
+    volumes:
+      - strapi_mysql_data:/var/lib/mysql
+      - ./mysql/conf.d:/etc/mysql/conf.d:ro
+      - strapi_mysql_logs:/var/log/mysql
+      - /tmp:/tmp
+    # ports:
+    #   - "3306:3306"
+    command: >
+      --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --innodb-buffer-pool-size=256M --max-connections=1000 --skip-name-resolve --sql-mode=STRICT_TRANS_TABLES,NO_ZERO_DATE,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO
+    networks:
+      - strapi_network
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "${DATABASE_USERNAME}", "-p${DATABASE_PASSWORD}" ]
+      timeout: 20s
+      retries: 10
+      interval: 30s
+      start_period: 80s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Strapi Application
+  strapi-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NODE_ENV: production
+    container_name: strapi-app
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_HOST: strapi-mysql
+      NODE_ENV: production
+    volumes:
+      - ./public/uploads:/app/public/uploads
+      - strapi_app_uploads:/app/public/uploads
+    ports:
+      - "1337:1337"
+    networks:
+      - strapi_network
+    depends_on:
+      strapi-mysql:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:1337/admin" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Nginx Reverse Proxy
+  strapi-nginx:
+    image: nginx:alpine
+    container_name: strapi-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./public/uploads:/var/www/uploads:ro
+      - strapi_nginx_logs:/var/log/nginx
+    networks:
+      - strapi_network
+    depends_on:
+      strapi-app:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  strapi_mysql_data:
+    driver: local
+  strapi_mysql_logs:
+    driver: local
+  strapi_app_uploads:
+    driver: local
+  strapi_nginx_logs:
+    driver: local
+
+networks:
+  strapi_network:
+    driver: bridge
+
+
+//--- END OF FILE: docker-compose.yml ---
+
+//--- FILE: Dockerfile ---
+
+# Use Node.js LTS version
+FROM node:18-alpine
+
+# Install system dependencies
+RUN apk add --no-cache \
+    build-base \
+    cairo-dev \
+    jpeg-dev \
+    pango-dev \
+    musl-dev \
+    giflib-dev \
+    pixman-dev \
+    pangomm-dev \
+    libjpeg-turbo-dev \
+    freetype-dev \
+    python3 \
+    make \
+    g++ \
+    curl \
+    wget
+
+# Create app directory
+WORKDIR /app
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S strapi -u 1001
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm ci && npm cache clean --force
+
+# Copy source code
+COPY . .
+
+# Create necessary directories with proper permissions
+RUN mkdir -p public/uploads && \
+    mkdir -p .tmp && \
+    mkdir -p dist && \
+    chown -R strapi:nodejs /app && \
+    chmod -R 755 /app
+
+# Switch to non-root user
+USER strapi
+
+# Build the application
+RUN npm run build
+
+# Expose port
+EXPOSE 1337
+
+# Add health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:1337/admin || exit 1
+
+# Start the application
+CMD ["npm", "start"]
+
+//--- END OF FILE: Dockerfile ---
+
+//--- FILE: config/admin.ts ---
+
+export default ({ env }) => ({
+  auth: {
+    secret: env('ADMIN_JWT_SECRET'),
+  },
+  apiToken: {
+    salt: env('API_TOKEN_SALT'),
+  },
+  transfer: {
+    token: {
+      salt: env('TRANSFER_TOKEN_SALT'),
+    },
+  },
+  secrets: {
+    encryptionKey: env('ENCRYPTION_KEY'),
+  },
+  flags: {
+    nps: env.bool('FLAG_NPS', true),
+    promoteEE: env.bool('FLAG_PROMOTE_EE', true),
+  },
+});
+
+
+//--- END OF FILE: config/admin.ts ---
+
+//--- FILE: config/api.ts ---
+
+export default {
+  rest: {
+    defaultLimit: 25,
+    maxLimit: 100,
+    withCount: true,
+  },
+};
+
+
+//--- END OF FILE: config/api.ts ---
+
+//--- FILE: config/database.ts ---
+
+import path from 'path';
+
+export default ({ env }) => {
+  const client = env('DATABASE_CLIENT', 'sqlite');
+
+  const connections = {
+    mysql: {
+      connection: {
+        host: env('DATABASE_HOST', 'localhost'),
+        port: env.int('DATABASE_PORT', 3306),
+        database: env('DATABASE_NAME', 'strapi'),
+        user: env('DATABASE_USERNAME', 'strapi'),
+        password: env('DATABASE_PASSWORD', 'strapi'),
+        ssl: env.bool('DATABASE_SSL', false) && {
+          key: env('DATABASE_SSL_KEY', undefined),
+          cert: env('DATABASE_SSL_CERT', undefined),
+          ca: env('DATABASE_SSL_CA', undefined),
+          capath: env('DATABASE_SSL_CAPATH', undefined),
+          cipher: env('DATABASE_SSL_CIPHER', undefined),
+          rejectUnauthorized: env.bool('DATABASE_SSL_REJECT_UNAUTHORIZED', true),
+        },
+      },
+      pool: { min: env.int('DATABASE_POOL_MIN', 2), max: env.int('DATABASE_POOL_MAX', 10) },
+    },
+    postgres: {
+      connection: {
+        connectionString: env('DATABASE_URL'),
+        host: env('DATABASE_HOST', 'localhost'),
+        port: env.int('DATABASE_PORT', 5432),
+        database: env('DATABASE_NAME', 'strapi'),
+        user: env('DATABASE_USERNAME', 'strapi'),
+        password: env('DATABASE_PASSWORD', 'strapi'),
+        ssl: env.bool('DATABASE_SSL', false) && {
+          key: env('DATABASE_SSL_KEY', undefined),
+          cert: env('DATABASE_SSL_CERT', undefined),
+          ca: env('DATABASE_SSL_CA', undefined),
+          capath: env('DATABASE_SSL_CAPATH', undefined),
+          cipher: env('DATABASE_SSL_CIPHER', undefined),
+          rejectUnauthorized: env.bool('DATABASE_SSL_REJECT_UNAUTHORIZED', true),
+        },
+        schema: env('DATABASE_SCHEMA', 'public'),
+      },
+      pool: { min: env.int('DATABASE_POOL_MIN', 2), max: env.int('DATABASE_POOL_MAX', 10) },
+    },
+    sqlite: {
+      connection: {
+        filename: path.join(__dirname, '..', '..', env('DATABASE_FILENAME', '.tmp/data.db')),
+      },
+      useNullAsDefault: true,
+    },
+  };
+
+  return {
+    connection: {
+      client,
+      ...connections[client],
+      acquireConnectionTimeout: env.int('DATABASE_CONNECTION_TIMEOUT', 60000),
+    },
+  };
+};
+
+
+//--- END OF FILE: config/database.ts ---
+
+//--- FILE: config/middlewares.ts ---
+
+export default [
+  'strapi::logger',
+  'strapi::errors',
+  'strapi::security',
+  'strapi::cors',
+  'strapi::poweredBy',
+  'strapi::query',
+  'strapi::body',
+  'strapi::session',
+  'strapi::favicon',
+  'strapi::public',
+];
+
+
+//--- END OF FILE: config/middlewares.ts ---
+
+//--- FILE: config/plugins.ts ---
+
+export default ({ env }) => ({
+    // Email plugin configuration
+    email: {
+        config: {
+            provider: '@strapi/provider-email-sendgrid',
+            providerOptions: {
+            },
+            settings: {
+                defaultFrom: env('EMAIL_FROM', 'noreply@waterpark-simulator.com'),
+                defaultReplyTo: env('EMAIL_REPLY_TO', 'noreply@waterpark-simulator.com'),
+                testAddress: env('EMAIL_TEST_ADDRESS'), // Optional: for testing
+            },
+        },
+    },
+
+    // Users & Permissions plugin (nếu cần custom)
+    'users-permissions': {
+        config: {
+            // Email templates sẽ được cấu hình qua admin panel
+            email: {
+                from: env('EMAIL_FROM', 'noreply@waterpark-simulator.com'),
+                replyTo: env('EMAIL_REPLY_TO', 'noreply@waterpark-simulator.com'),
+            },
+        },
+    },
+
+    // Nếu bạn muốn sử dụng provider khác (optional)
+    // Uncomment phần dưới và cấu hình provider bạn muốn
+
+    // // SendGrid
+    // email: {
+    //   config: {
+    //     provider: 'sendgrid',
+    //     providerOptions: {
+    //       apiKey: env('SENDGRID_API_KEY'),
+    //     },
+    //     settings: {
+    //       defaultFrom: env('EMAIL_FROM'),
+    //       defaultReplyTo: env('EMAIL_REPLY_TO'),
+    //     },
+    //   },
+    // },
+
+    // // Mailgun
+    // email: {
+    //   config: {
+    //     provider: 'mailgun',
+    //     providerOptions: {
+    //       key: env('MAILGUN_API_KEY'),
+    //       domain: env('MAILGUN_DOMAIN'),
+    //       url: env('MAILGUN_URL', 'https://api.mailgun.net'), // Optional
+    //     },
+    //     settings: {
+    //       defaultFrom: env('EMAIL_FROM'),
+    //       defaultReplyTo: env('EMAIL_REPLY_TO'),
+    //     },
+    //   },
+    // },
+
+    // // AWS SES
+    // email: {
+    //   config: {
+    //     provider: 'amazon-ses',
+    //     providerOptions: {
+    //       key: env('AWS_SES_KEY'),
+    //       secret: env('AWS_SES_SECRET'),
+    //       amazon: env('AWS_SES_REGION', 'us-east-1'),
+    //     },
+    //     settings: {
+    //       defaultFrom: env('EMAIL_FROM'),
+    //       defaultReplyTo: env('EMAIL_REPLY_TO'),
+    //     },
+    //   },
+    // },
+
+    // // Gmail/Google
+    // email: {
+    //   config: {
+    //     provider: 'nodemailer',
+    //     providerOptions: {
+    //       host: 'smtp.gmail.com',
+    //       port: 587,
+    //       auth: {
+    //         user: env('GMAIL_USERNAME'),
+    //         pass: env('GMAIL_PASSWORD'), // Use App Password, not regular password
+    //       },
+    //     },
+    //     settings: {
+    //       defaultFrom: env('EMAIL_FROM'),
+    //       defaultReplyTo: env('EMAIL_REPLY_TO'),
+    //     },
+    //   },
+    // },
+});
+
+//--- END OF FILE: config/plugins.ts ---
+
+//--- FILE: config/server.ts ---
+
+export default ({ env }) => ({
+  host: env('HOST', '0.0.0.0'),
+  port: env.int('PORT', 1337),
+  app: {
+    keys: env.array('APP_KEYS'),
+  },
+});
+
+
+//--- END OF FILE: config/server.ts ---
+
+//--- FILE: nginx/nginx.conf ---
+
+user nginx;
+worker_processes auto;
+error_log /var/log/nginx/error.log notice;
+pid /var/run/nginx.pid;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
+
+    # Logging format
+    log_format main '$remote_addr - $remote_user [$time_local] "$request" '
+                    '$status $body_bytes_sent "$http_referer" '
+                    '"$http_user_agent" "$http_x_forwarded_for"';
+
+    access_log /var/log/nginx/access.log main;
+
+    # Basic settings
+    sendfile on;
+    tcp_nopush on;
+    tcp_nodelay on;
+    keepalive_timeout 65;
+    types_hash_max_size 2048;
+    client_max_body_size 100M;
+
+    # Gzip compression
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1024;
+    gzip_proxied any;
+    gzip_comp_level 6;
+    gzip_types
+        text/plain
+        text/css
+        text/xml
+        text/javascript
+        application/json
+        application/javascript
+        application/xml+rss
+        application/atom+xml
+        image/svg+xml;
+
+    # Rate limiting
+    limit_req_zone $binary_remote_addr zone=api:10m rate=10r/s;
+    limit_req_zone $binary_remote_addr zone=admin:10m rate=5r/s;
+
+    # Upstream for Strapi - Updated service name
+    upstream strapi {
+        server strapi-app:1337;
+        keepalive 32;
+    }
+
+    # Main server block
+    server {
+        listen 80;
+        server_name _;
+        
+        # Security headers
+        add_header X-Frame-Options "SAMEORIGIN" always;
+        add_header X-XSS-Protection "1; mode=block" always;
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header Referrer-Policy "no-referrer-when-downgrade" always;
+        add_header Content-Security-Policy "default-src 'self' http: https: data: blob: 'unsafe-inline'" always;
+
+        # Health check endpoint
+        location /health {
+            access_log off;
+            return 200 "healthy\n";
+            add_header Content-Type text/plain;
+        }
+
+        # Static files from uploads
+        location /uploads/ {
+            alias /var/www/uploads/;
+            expires 1M;
+            access_log off;
+            add_header Cache-Control "public, immutable";
+            
+            # Handle missing files gracefully
+            try_files $uri $uri/ =404;
+        }
+
+        # Admin panel with rate limiting
+        location /admin {
+            limit_req zone=admin burst=10 nodelay;
+            proxy_pass http://strapi;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection 'upgrade';
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_cache_bypass $http_upgrade;
+            proxy_read_timeout 86400;
+            
+            # Handle WebSocket connections
+            proxy_buffering off;
+        }
+
+        # API routes with rate limiting
+        location /api/ {
+            limit_req zone=api burst=20 nodelay;
+            proxy_pass http://strapi;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection 'upgrade';
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_cache_bypass $http_upgrade;
+            
+            # CORS headers for API
+            add_header Access-Control-Allow-Origin * always;
+            add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS" always;
+            add_header Access-Control-Allow-Headers "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization" always;
+            
+            # Handle preflight requests
+            if ($request_method = 'OPTIONS') {
+                add_header Access-Control-Allow-Origin * always;
+                add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS" always;
+                add_header Access-Control-Allow-Headers "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization" always;
+                add_header Access-Control-Max-Age 1728000;
+                add_header Content-Type 'text/plain charset=UTF-8';
+                add_header Content-Length 0;
+                return 204;
+            }
+        }
+
+        # All other requests to Strapi
+        location / {
+            proxy_pass http://strapi;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection 'upgrade';
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_cache_bypass $http_upgrade;
+            
+            # Timeout settings
+            proxy_connect_timeout 60s;
+            proxy_send_timeout 60s;
+            proxy_read_timeout 60s;
+        }
+
+        # Deny access to hidden files
+        location ~ /\. {
+            deny all;
+            access_log off;
+            log_not_found off;
+        }
+
+        # Deny access to backup and config files
+        location ~* \.(bak|config|sql|fla|psd|ini|log|sh|inc|swp|dist)$ {
+            deny all;
+            access_log off;
+            log_not_found off;
+        }
+    }
+}
+
+//--- END OF FILE: nginx/nginx.conf ---
+
+//--- FILE: .github/workflows/deploy.yml ---
+
+name: Deploy to AWS Lightsail
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+env:
+  LIGHTSAIL_HOST: ${{ secrets.LIGHTSAIL_HOST }}
+  LIGHTSAIL_USERNAME: ${{ secrets.LIGHTSAIL_USERNAME }}
+  LIGHTSAIL_SSH_KEY: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup SSH key
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.LIGHTSAIL_SSH_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H ${{ secrets.LIGHTSAIL_HOST }} >> ~/.ssh/known_hosts
+
+    - name: Create production environment file
+      run: |
+        cat > .env.production << 'EOF'
+        # Server Configuration
+        HOST=0.0.0.0
+        PORT=1337
+        NODE_ENV=production
+
+        # Security Keys
+        APP_KEYS=${{ secrets.APP_KEYS }}
+        API_TOKEN_SALT=${{ secrets.API_TOKEN_SALT }}
+        ADMIN_JWT_SECRET=${{ secrets.ADMIN_JWT_SECRET }}
+        TRANSFER_TOKEN_SALT=${{ secrets.TRANSFER_TOKEN_SALT }}
+        ENCRYPTION_KEY=${{ secrets.ENCRYPTION_KEY }}
+        JWT_SECRET=${{ secrets.JWT_SECRET }}
+
+        # Database Configuration
+        DATABASE_CLIENT=mysql
+        DATABASE_HOST=strapi-mysql
+        DATABASE_PORT=3306
+        DATABASE_NAME=${{ secrets.DATABASE_NAME }}
+        DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}
+        DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
+        DATABASE_SSL=false
+
+        # CORS and Frontend URL
+        FRONTEND_URL="${{ secrets.FRONTEND_URL }}"
+
+        # External Services
+        CLOUDFLARE_TURNSTILE_SECRET_KEY=${{ secrets.CLOUDFLARE_TURNSTILE_SECRET_KEY }}
+        GOOGLE_RECAPTCHA_SECRET_KEY=${{ secrets.GOOGLE_RECAPTCHA_SECRET_KEY }}
+        SUBSCRIBE_COOLDOWN_MINUTES=5
+        CONFIRMATION_TOKEN_EXPIRES_DAYS=7
+
+        # Email Configuration
+        EMAIL_PROVIDER=nodemailer
+        EMAIL_HOST=${{ secrets.EMAIL_HOST }}
+        EMAIL_PORT=${{ secrets.EMAIL_PORT }}
+        EMAIL_USER=${{ secrets.EMAIL_USER }}
+        EMAIL_PASS=${{ secrets.EMAIL_PASS }}
+        EMAIL_FROM="${{ secrets.EMAIL_FROM }}"
+        EMAIL_REPLY_TO="${{ secrets.EMAIL_REPLY_TO }}"
+        EOF
+
+    - name: Copy files to server
+      run: |
+        # Create project directory if not exists
+        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_HOST }} "mkdir -p ~/cms-waterpark-simulator"
+        
+        # Copy all files except sensitive ones
+        rsync -avz -e "ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no" \
+          --exclude='.git' \
+          --exclude='node_modules' \
+          --exclude='.env' \
+          --exclude='public/uploads' \
+          ./ ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_HOST }}:~/cms-waterpark-simulator/
+
+    - name: Deploy application
+      run: |
+        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_HOST }} << 'ENDSSH'
+          cd ~/cms-waterpark-simulator
+          
+          # Stop existing containers
+          docker compose down || true
+          
+          # Remove old images to free space
+          docker image prune -f || true
+          
+          # Copy production env file
+          cp .env.production .env
+          
+          # Create necessary directories
+          mkdir -p public/uploads
+          mkdir -p nginx/conf.d
+          mkdir -p nginx/ssl
+          mkdir -p mysql/conf.d
+          
+          # Fix nginx config location
+          if [ -f nginx.nginx.conf ]; then
+            mkdir -p nginx
+            mv nginx.nginx.conf nginx/nginx.conf
+          fi
+          
+          # Create MySQL config if not exists
+          if [ ! -f mysql/conf.d/mysql.cnf ]; then
+            cat > mysql/conf.d/mysql.cnf << 'EOFMYSQL'
+        [mysqld]
+        character-set-server=utf8mb4
+        collation-server=utf8mb4_unicode_ci
+        max_connections=1000
+        innodb_buffer_pool_size=128M
+        innodb_log_file_size=64M
+        slow_query_log=1
+        slow_query_log_file=/var/log/mysql/slow.log
+        long_query_time=2
+        EOFMYSQL
+          fi
+          
+          # Build and start containers
+          docker compose up -d --build
+          
+          # Wait for services to be ready
+          echo "Waiting for services to start..."
+          sleep 30
+          
+          # Check service health
+          docker compose ps
+          docker compose logs --tail=50
+          
+        ENDSSH
+
+    - name: Health check
+      run: |
+        # Wait a bit more for services to fully start
+        sleep 60
+        
+        # Check if the application is responding
+        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_HOST }} << 'ENDSSH'
+          # Check if containers are running
+          cd ~/cms-waterpark-simulator
+          docker compose ps
+          
+          # Test nginx health endpoint
+          if curl -f http://localhost/health; then
+            echo "✅ Nginx health check passed"
+          else
+            echo "❌ Nginx health check failed"
+            exit 1
+          fi
+          
+          # Test Strapi is responding
+          if curl -f http://localhost:1337/_health 2>/dev/null || curl -f http://localhost:1337/admin 2>/dev/null; then
+            echo "✅ Strapi health check passed"
+          else
+            echo "❌ Strapi health check failed"
+            echo "Strapi logs:"
+            docker compose logs strapi-app --tail=20
+            exit 1
+          fi
+          
+        ENDSSH
+
+    - name: Cleanup
+      if: always()
+      run: |
+        rm -f ~/.ssh/id_rsa
+        rm -f .env.production
+
+//--- END OF FILE: .github/workflows/deploy.yml ---
+
+//--- FILE: mysql/conf.d/mysql.cnf ---
+
+[mysqld]
+# Character set configuration
+character-set-server=utf8mb4
+collation-server=utf8mb4_unicode_ci
+
+# Connection settings
+max_connections=1000
+wait_timeout=28800
+interactive_timeout=28800
+
+# Performance tuning
+innodb_buffer_pool_size=256M
+innodb_log_file_size=64M
+innodb_flush_log_at_trx_commit=2
+innodb_flush_method=O_DIRECT
+
+# Query cache (if using older MySQL versions)
+query_cache_type=1
+query_cache_size=32M
+
+# Logging
+slow_query_log=1
+slow_query_log_file=/var/log/mysql/slow.log
+long_query_time=2
+log_error=/var/log/mysql/error.log
+
+# Binary logging for replication (optional)
+log_bin=mysql-bin
+binlog_format=ROW
+expire_logs_days=7
+
+# Security
+local_infile=0
+
+[mysql]
+default-character-set=utf8mb4
+
+[client]
+default-character-set=utf8mb4
+
+//--- END OF FILE: mysql/conf.d/mysql.cnf ---
+
