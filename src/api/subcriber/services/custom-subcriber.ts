@@ -34,7 +34,7 @@ export default ({ strapi }) => ({
             }
             await emailService.send({
                 to: email,
-                from: "no-reply@waterpark-simulator.com",
+                from: process.env.FROM,
                 replyTo: process.env.EMAIL_REPLY_TO,
                 subject: emailTemplate.subject,
                 html: emailTemplate.html,
