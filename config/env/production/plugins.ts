@@ -1,4 +1,5 @@
-module.exports = ({ env }) => ({
+
+export default ({ env }) => ({
     email: {
         config: {
             provider: 'amazon-ses',
